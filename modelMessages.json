@@ -1,0 +1,17 @@
+[
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "file",
+        "mediaType": "image/png",
+        "filename": "icon.png",
+        "data": "https://repogo.app/icon.png"
+      },
+      {
+        "type": "text",
+        "text": "What's on this image"
+      }
+    ]
+  }
+]
