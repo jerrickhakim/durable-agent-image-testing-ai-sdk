@@ -1,7 +1,15 @@
 import { convertToModelMessages, type UIMessageChunk, type UIMessage, ModelMessage } from "ai";
-import { DurableAgent } from "@workflow/ai/agent";
+import { DurableAgent, type DownloadFunction } from "@workflow/ai/agent";
 import { getWritable } from "workflow";
 import { fetch } from "workflow";
+
+/**
+ * Custom download for workflow context. The default AI SDK download uses fetch,
+ * which throws "Not supported in workflow functions" in the workflow runtime.
+ * We pass URLs through to the model (return null for each) so the model receives
+ * the URL directly. Models that support image URLs (e.g. Claude, GPT-4V) will fetch them.
+ */
+const workflowDownload: DownloadFunction = async (requestedDownloads) => requestedDownloads.map(() => null);
 
 /**
  * Dead simple chat workflow using DurableAgent with Vercel AI Gateway.
@@ -15,12 +23,13 @@ export async function chat(modelMessages: ModelMessage[]) {
   const writable = getWritable<UIMessageChunk>();
 
   const agent = new DurableAgent({
-    model: "gemini/gemini-3-flash",
+    model: "google/gemini-3-flash",
     system: "You are a helpful assistant.",
   });
 
   await agent.stream({
     messages: modelMessages,
     writable,
+    experimental_download: workflowDownload,
   });
 }

@@ -8,6 +8,23 @@ Test of sending images to AI models via durable agents.
 
 **Tool-loop agent works** → Use [http://localhost:3000/tool-agent](http://localhost:3000/tool-agent) (non-durable, no workflow; image URLs work)
 
+### Solution: `experimental_download: workflowDownload`
+
+The default AI SDK download uses `fetch`, which throws "Not supported in workflow functions" in the workflow runtime. Use a custom download that returns `null` for each URL so the model receives the URL directly—models that support image URLs (e.g. Claude, GPT-4V) will fetch them.
+
+```ts
+import { DurableAgent, type DownloadFunction } from "@workflow/ai/agent";
+
+const workflowDownload: DownloadFunction = async (requestedDownloads) =>
+  requestedDownloads.map(() => null);
+
+await agent.stream({
+  messages: modelMessages,
+  writable,
+  experimental_download: workflowDownload,
+});
+```
+
 ## Setup
 
 ```bash
